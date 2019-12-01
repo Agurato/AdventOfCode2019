@@ -19,7 +19,7 @@ fn fetch_input(path: &str) -> Result<Vec<i32>, &'static str> {
 }
 
 fn step_1a(items: &Vec<i32>) -> i32 {
-    items.iter().map(|x| (x / 3) - 2).fold(0, |acc, x| acc + x)
+    items.iter().map(|x| (x / 3) - 2).sum()
 }
 
 fn step_1b(items: &Vec<i32>) -> i32 {
@@ -39,7 +39,7 @@ fn step_1b(items: &Vec<i32>) -> i32 {
     items
         .iter()
         .map(|x| get_fuel_per_module(x))
-        .fold(0, |acc, x| acc + x)
+        .sum()
 }
 
 fn main() {
