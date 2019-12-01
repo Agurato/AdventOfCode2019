@@ -8,7 +8,7 @@ def calculate_fuel(mass):
     return fuel_mass + calculate_fuel(fuel_mass)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with open("input.txt", "r") as input_f:
         fuel_sum = 0
         for line in input_f:
