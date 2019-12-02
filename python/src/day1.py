@@ -23,7 +23,7 @@ def puzzle2(input_f):
 
 
 if __name__ == "__main__":
-    with open("input.txt", "r") as input_f:
+    with open("res/day1.txt", "r") as input_f:
         print(puzzle1(input_f))
         input_f.seek(0)
         print(puzzle2(input_f))

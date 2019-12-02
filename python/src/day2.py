@@ -29,7 +29,7 @@ def puzzle2(original):
 
 
 if __name__ == "__main__":
-    with open("input.txt", "r") as input_f:
+    with open("res/day2.txt", "r") as input_f:
         inputcodes = [int(i) for i in input_f.read().split(",")]
         inputcodes[1] = 12
         inputcodes[2] = 2
