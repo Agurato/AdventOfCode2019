@@ -47,22 +47,20 @@ def get_intersec(wire, segment):
     wire_steps = 0
     for i in range(len(wire) - 1):
         if segment[0].x == segment[1].x and wire[i].y == wire[i + 1].y:
-            if (
-                min(segment[0].y, segment[1].y) < wire[i].y
-                and max(segment[0].y, segment[1].y) > wire[i].y
-                and min(wire[i].x, wire[i + 1].x) < segment[0].x
-                and max(wire[i].x, wire[i + 1].x) > segment[0].x
+            if min(segment[0].y, segment[1].y) < wire[i].y < max(
+                segment[0].y, segment[1].y
+            ) and min(wire[i].x, wire[i + 1].x) < segment[0].x < max(
+                wire[i].x, wire[i + 1].x
             ):
                 return (
                     Point(segment[0].x, wire[i].y),
                     wire_steps + abs(segment[0].x - wire[i].x),
                 )
         elif segment[0].y == segment[1].y and wire[i].x == wire[i + 1].x:
-            if (
-                min(segment[0].x, segment[1].x) < wire[i].x
-                and max(segment[0].x, segment[1].x) > wire[i].x
-                and min(wire[i].y, wire[i + 1].y) < segment[0].y
-                and max(wire[i].y, wire[i + 1].y) > segment[0].y
+            if min(segment[0].x, segment[1].x) < wire[i].x < max(
+                segment[0].x, segment[1].x
+            ) and min(wire[i].y, wire[i + 1].y) < segment[0].y < max(
+                wire[i].y, wire[i + 1].y
             ):
                 return (
                     Point(wire[i].x, segment[0].y),
