@@ -1,5 +1,6 @@
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     let items_1 = day1::fetch_input("res/1.txt").expect("Could not open file");
