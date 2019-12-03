@@ -1,6 +1,8 @@
+use std::cmp::{max, min};
 use std::fs::File;
 use std::io::prelude::*;
 use std::ops::Range;
+
 /*
     From instructions, construct a list of segments belonging to
     wire1 and wire2, then check for collisions between every segment.
@@ -27,6 +29,11 @@ impl std::ops::Add for Point {
     }
 }
 
+impl Point {
+    fn manhattan_to_center(self) -> i32 {
+        self.x.abs() + self.y.abs()
+    }
+}
 impl Segment {
     fn vert(self) -> bool {
         self.start.x == self.stop.x
@@ -40,24 +47,43 @@ impl Segment {
         // println!("Intersecting {:?} with {:?}", self, other);
         //segment vertical
         if self.vert() && other.horiz() {
-            println!("Vertical: {} {}", other.start.x, other.stop.x);
-            let bounds_1 = (Range{start: other.start.y, end:other.stop.y}).contains(&self.start.y);
-            let bounds_2 = (Range{start: self.start.x, end:self.stop.x}).contains(&other.start.x);
-            println!("{}{}", bounds_1, bounds_2);
+            let bounds_1 = (Range {
+                start: min(self.start.y, self.stop.y),
+                end: max(self.start.y, self.stop.y),
+            })
+            .contains(&other.start.y);
+            let bounds_2 = (Range {
+                start: min(other.start.x, other.stop.x),
+                end: max(other.stop.x, other.start.x),
+            })
+            .contains(&self.start.x);
             if bounds_1 && bounds_2 {
-                return Some(Point{x: other.start.x, y: self.start.y});
+                return Some(Point {
+                    x: self.start.x,
+                    y: other.start.y,
+                });
             }
         }
 
         //segment horizontal
         if self.horiz() && other.vert() {
-            println!("Horizontal: {} {}", other.start.x, other.stop.x);
-            let bounds_1 = (Range{start: other.start.x, end:other.stop.x}).contains(&self.start.x);
-            let bounds_2 = (Range{start: self.start.y, end:self.stop.y}).contains(&other.start.y);
+            let bounds_1 = (Range {
+                start: min(self.start.x, self.stop.x),
+                end: max(self.start.x, self.stop.x),
+            })
+            .contains(&other.start.x);
+            let bounds_2 = (Range {
+                start: min(other.start.y, other.stop.y),
+                end: max(other.stop.y, other.start.y),
+            })
+            .contains(&self.start.y);
             if bounds_1 && bounds_2 {
-                return Some(Point{x: self.start.x, y: other.start.y});
+                return Some(Point {
+                    x: other.start.x,
+                    y: self.start.y,
+                });
             }
-        } 
+        }
         None
     }
 }
@@ -119,6 +145,20 @@ pub fn get_segments(wires: Vec<Vec<String>>) -> Result<Vec<Vec<Segment>>, &'stat
     Ok(wire_segments)
 }
 
+pub fn step_3a(items: &Vec<Vec<String>>) -> i32{
+    let segments = get_segments(items.to_vec()).expect("Error getting segments");
+    let mut min_distance: i32 = std::i32::MAX;
+    for segment in &segments[0] {
+        for segment_2 in &segments[1] {
+            min_distance = match segment.intersection(*segment_2) {
+                Some(p) => min(min_distance, p.manhattan_to_center()),
+                None => min_distance,
+            };
+        }
+    }
+    min_distance
+}
+
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
@@ -143,9 +183,15 @@ mod tests {
         // fetch_input("res/3.txt");
         // println!("{:?}", get_segments(wires));
         let segments = get_segments(wires).expect("Error getting segments");
+        // let intersections;
         for segment in &segments[0] {
             for segment_2 in &segments[1] {
-                println!("{:?}", segment.intersection(*segment_2));
+                // intersections.push(segment.intersection(*segment_2).manhattan_to_center());
+                match segment.intersection(*segment_2) {
+                    Some(p) => println!("{}", p.manhattan_to_center()),
+                    _ => (),
+                }
+                // println!("{:?}", segment.intersection(*segment_2).exmanhattan_to_center());
             }
         }
         // assert_eq!(wire1[0], "R8");
