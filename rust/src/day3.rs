@@ -37,37 +37,27 @@ impl Segment {
     }
 
     fn intersection(self, other: Self) -> Option<Point> {
+        // println!("Intersecting {:?} with {:?}", self, other);
+        //segment vertical
         if self.vert() && other.horiz() {
-            if (Range {
-                start: self.start.x,
-                end: self.stop.x,
-            })
-            .contains(&other.start.x)
-                && (Range {
-                    start: other.start.y,
-                    end: other.stop.y,
-                })
-                .contains(&self.start.y)
-            {
-                return Some(Point { x: 0, y: 0 });
+            println!("Vertical: {} {}", other.start.x, other.stop.x);
+            let bounds_1 = (Range{start: other.start.y, end:other.stop.y}).contains(&self.start.y);
+            let bounds_2 = (Range{start: self.start.x, end:self.stop.x}).contains(&other.start.x);
+            println!("{}{}", bounds_1, bounds_2);
+            if bounds_1 && bounds_2 {
+                return Some(Point{x: other.start.x, y: self.start.y});
             }
-            return None;
         }
+
+        //segment horizontal
         if self.horiz() && other.vert() {
-            if (Range {
-                start: other.start.x,
-                end: other.stop.x,
-            })
-            .contains(&self.start.x)
-                && (Range {
-                    start: self.start.y,
-                    end: self.stop.y,
-                })
-                .contains(&other.start.y)
-            {
-                return Some(Point { x: 0, y: 0 });
+            println!("Horizontal: {} {}", other.start.x, other.stop.x);
+            let bounds_1 = (Range{start: other.start.x, end:other.stop.x}).contains(&self.start.x);
+            let bounds_2 = (Range{start: self.start.y, end:self.stop.y}).contains(&other.start.y);
+            if bounds_1 && bounds_2 {
+                return Some(Point{x: self.start.x, y: other.start.y});
             }
-        }
+        } 
         None
     }
 }
@@ -136,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_1() {
-        let wire1: Vec<Vec<String>> = vec![
+        let wires: Vec<Vec<String>> = vec![
             vec![
                 "R8".to_string(),
                 "U5".to_string(),
@@ -151,7 +141,13 @@ mod tests {
             ],
         ];
         // fetch_input("res/3.txt");
-        println!("{:?}", get_segments(wire1));
+        // println!("{:?}", get_segments(wires));
+        let segments = get_segments(wires).expect("Error getting segments");
+        for segment in &segments[0] {
+            for segment_2 in &segments[1] {
+                println!("{:?}", segment.intersection(*segment_2));
+            }
+        }
         // assert_eq!(wire1[0], "R8");
     }
 }
