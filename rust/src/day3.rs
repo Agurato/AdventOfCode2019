@@ -1,10 +1,75 @@
 use std::fs::File;
 use std::io::prelude::*;
-
+use std::ops::Range;
 /*
     From instructions, construct a list of segments belonging to
     wire1 and wire2, then check for collisions between every segment.
 */
+#[derive(Copy, Debug, Clone)]
+pub struct Point {
+    x: i32,
+    y: i32,
+}
+
+#[derive(Copy, Debug, Clone)]
+pub struct Segment {
+    start: Point,
+    stop: Point,
+}
+
+impl std::ops::Add for Point {
+    type Output = Self;
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+impl Segment {
+    fn vert(self) -> bool {
+        self.start.x == self.stop.x
+    }
+
+    fn horiz(self) -> bool {
+        !self.vert()
+    }
+    fn intersection(self, other: Self) -> Option<Point> {
+        if self.vert() && other.horiz() {
+            if (Range {
+                start: self.start.x,
+                end: self.stop.x,
+            })
+            .contains(&other.start.x)
+                && (Range {
+                    start: other.start.y,
+                    end: other.stop.y,
+                })
+                .contains(&self.start.y)
+            {
+                return Some(Point { x: 0, y: 0 });
+            }
+            return None;
+        }
+        if self.horiz() && other.vert() {
+            if (Range {
+                start: other.start.x,
+                end: other.stop.x,
+            })
+            .contains(&self.start.x)
+                && (Range {
+                    start: self.start.y,
+                    end: self.stop.y,
+                })
+                .contains(&other.start.y)
+            {
+                return Some(Point { x: 0, y: 0 });
+            }
+        }
+        None
+    }
+}
 
 pub fn fetch_input(path: &str) -> Result<Vec<Vec<String>>, &'static str> {
     let mut file = match File::open(path) {
@@ -25,33 +90,41 @@ pub fn fetch_input(path: &str) -> Result<Vec<Vec<String>>, &'static str> {
     Ok(wires)
 }
 
-pub fn get_segments(wires: Vec<Vec<String>>) -> Result<Vec<Vec<(i32, i32)>>, &'static str> {
-    let mut wire_segments: Vec<Vec<(i32, i32)>> = Vec::new();
-    let mut tmp;
-    let mut carry = (0i32, 0i32);
+pub fn get_segments(wires: Vec<Vec<String>>) -> Result<Vec<Vec<Segment>>, &'static str> {
+    let mut wire_displacements: Vec<Vec<Point>> = Vec::new();
 
     // Transform U30 into (0, 30)
     for wire in &wires {
-        tmp = wire
-            .iter()
-            .map(|x| {
-                let value = x[1..].parse::<i32>().expect("Could not parse integer");
-                return match x.chars().nth(0) {
-                    Some('U') => (0, value),
-                    Some('D') => (0, -value),
-                    Some('L') => (value, 0),
-                    Some('R') => (-value, 0),
-                    _ => panic!("unrecognized direction"),
-                };
-            })
-            .collect();
-        wire_segments.push(tmp);
+        wire_displacements.push(
+            wire.iter()
+                .map(|x| {
+                    let value = x[1..].parse::<i32>().expect("Could not parse integer");
+                    return match x.chars().nth(0) {
+                        Some('U') => Point { x: 0, y: value },
+                        Some('D') => Point { x: 0, y: -value },
+                        Some('L') => Point { x: value, y: 0 },
+                        Some('R') => Point { x: -value, y: 0 },
+                        _ => panic!("unrecognized direction"),
+                    };
+                })
+                .collect(),
+        );
     }
 
-    //Apply displacements sequentially
+    let mut wire_segments: Vec<Vec<Segment>> = vec![Vec::new(); wire_displacements.len()];
+    let mut carry;
 
-    println!("{:?}", wire_segments[0]);
-    println!("{:?}", wire_segments[1]);
+    for (wire_displacement, wire_segment) in wire_displacements.iter().zip(wire_segments.iter_mut())
+    {
+        carry = Point { x: 0, y: 0 };
+        for displacement in wire_displacement {
+            wire_segment.push(Segment {
+                start: carry,
+                stop: carry + *displacement,
+            });
+            carry = carry + *displacement;
+        }
+    }
     Ok(wire_segments)
 }
 
@@ -62,8 +135,22 @@ mod tests {
 
     #[test]
     fn test_1() {
-        let wire1 = ["R8", "U5", "L5", "D3"];
-        fetch_input("res/3.txt");
-        assert_eq!(wire1[0], "R8");
+        let wire1: Vec<Vec<String>> = vec![
+            vec![
+                "R8".to_string(),
+                "U5".to_string(),
+                "L5".to_string(),
+                "D3".to_string(),
+            ],
+            vec![
+                "U7".to_string(),
+                "R6".to_string(),
+                "D4".to_string(),
+                "L4".to_string(),
+            ],
+        ];
+        // fetch_input("res/3.txt");
+        println!("{:?}", get_segments(wire1));
+        // assert_eq!(wire1[0], "R8");
     }
 }
