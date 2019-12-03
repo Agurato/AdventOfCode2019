@@ -35,6 +35,7 @@ impl Segment {
     fn horiz(self) -> bool {
         !self.vert()
     }
+
     fn intersection(self, other: Self) -> Option<Point> {
         if self.vert() && other.horiz() {
             if (Range {
