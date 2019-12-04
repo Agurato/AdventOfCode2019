@@ -17,13 +17,13 @@ def check_never_decrease(number):
     while number:
         digit = number % 10
         number //= 10
-        if digit > prev_digit and prev_digit != -1:
+        if digit > prev_digit != -1:
             return False
         prev_digit = digit
     return True
 
 
-def check_two_max(number):
+def check_count_two(number):
     number_s = str(number)
     for d in number_s:
         if number_s.count(d) == 2:
@@ -45,7 +45,7 @@ def puzzle2(limits):
         if (
             check_double_digits(num)
             and check_never_decrease(num)
-            and check_two_max(num)
+            and check_count_two(num)
         ):
             count += 1
     return count
