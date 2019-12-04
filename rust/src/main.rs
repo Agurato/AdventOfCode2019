@@ -19,5 +19,7 @@ fn main() {
     println!("Step 3a: {}", day3::step_3a(&items_3));
 
     let items_4 = (172851, 675869);
+
     println!("Step 4a: {}", day4::step_4a(items_4.0, items_4.1));
+    println!("Step 4b: {}", day4::step_4b(items_4.0, items_4.1));
 }

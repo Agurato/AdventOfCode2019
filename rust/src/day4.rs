@@ -33,6 +33,31 @@ pub fn step_4a(min: i32, max: i32) -> usize {
     .count()
 }
 
+pub fn step_4b(min: i32, max: i32) -> usize {
+    let step_4a_results = Range {
+        start: min,
+        end: max,
+    }
+    .map(|i| (i, valid(&i.to_string())))
+    .filter(|i| i.1)
+    .map(|i| i.0.to_string())
+    .collect::<Vec<String>>();
+
+    let numbers: Vec<String> = (0..10).map(|s| s.to_string()).collect();
+
+    step_4a_results
+        .into_iter()
+        .filter(|i| {
+            for number in &numbers {
+                if i.matches(number).count() == 2 {
+                    return true;
+                }
+            }
+            false
+        })
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
