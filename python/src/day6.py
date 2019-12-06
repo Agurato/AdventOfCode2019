@@ -1,4 +1,4 @@
-# https://adventofcode.com/2019/day/5
+# https://adventofcode.com/2019/day/6
 
 
 class Planet:
@@ -17,6 +17,15 @@ class Planet:
             if self.center.distance == 0:
                 self.center.calc_distance()
             self.distance = self.center.distance + 1
+
+    def get_jumps(self):
+        jumps = []
+        p = self.center
+        while p.name != "COM":
+            jumps.insert(0, p.name)
+            p = p.center
+        jumps.insert(0, "COM")
+        return jumps
 
     def __str__(self):
         return self.name + " : " + str(self.distance)
@@ -44,8 +53,13 @@ def puzzle1(planets):
     return sum([planet.distance for planet in planets.values()])
 
 
-def puzzle2():
-    pass
+def puzzle2(planets):
+    from_YOU = planets["YOU"].get_jumps()
+    from_SAN = planets["SAN"].get_jumps()
+
+    for i in range(min(len(from_YOU), len(from_SAN))):
+        if from_YOU[i] != from_SAN[i]:
+            return (len(from_YOU) - i) + (len(from_SAN) - i)
 
 
 if __name__ == "__main__":
@@ -53,3 +67,4 @@ if __name__ == "__main__":
         orbit_list = [x.replace("\n", "") for x in input_f.readlines()]
         planets = compute_orbits(orbit_list)
         print(puzzle1(planets))
+        print(puzzle2(planets))
