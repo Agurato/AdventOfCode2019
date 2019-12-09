@@ -1,22 +1,39 @@
-# https://adventofcode.com/2019/day/7
-import itertools
+# https://adventofcode.com/2019/day/
 
 
 class Program:
-    def __init__(self, program, phase):
+    def __init__(self, program):
         self.i = 0
         self.program = program
-        self.phase = phase
-        self.last_out = 0
-        self.has_halted = False
+        self.relative_base = 0
+
+    def param(self, param_nb):
+        operation = "{:>05}".format(self.program[self.i])
+        param_mode = operation[-(2 + param_nb)]
+        if param_mode == "0":
+            if self.i + param_nb >= len(self.program):
+                return 0
+            return self.program[self.i + param_nb]
+        elif param_mode == "1":
+            return self.i + param_nb
+        elif param_mode == "2":
+            if self.i + param_nb >= len(self.program):
+                return 0
+            return self.program[self.i + param_nb] + self.relative_base
+
+    def extend_program(self, param1, param2, param3):
+        if max(param1, param2, param3) > len(self.program):
+            self.program += [0] * (max(param1, param2, param3) - len(self.program))
 
     def run(self, inputs):
         input_c = 0
+        outputs = []
         while self.i < len(self.program) and self.program[self.i] != 99:
             opcode = self.program[self.i] % 100
-            param1 = param(self.program, self.i, 1)
-            param2 = param(self.program, self.i, 2)
-            param3 = param(self.program, self.i, 3)
+            param1 = self.param(1)
+            param2 = self.param(2)
+            param3 = self.param(3)
+            self.extend_program(param1, param2, param3)
             if opcode == 1:
                 # Addition
                 self.program[param3] = self.program[param1] + self.program[param2]
@@ -32,9 +49,8 @@ class Program:
                 self.i += 2
             elif opcode == 4:
                 # Output
-                self.last_out = self.program[param1]
+                outputs.append(self.program[param1])
                 self.i += 2
-                return self.last_out
             elif opcode == 5:
                 # Jump if true
                 if self.program[param1] != 0:
@@ -61,48 +77,24 @@ class Program:
                 else:
                     self.program[param3] = 0
                 self.i += 4
-        self.has_halted = True
-        return self.last_out
+            elif opcode == 9:
+                self.relative_base += self.program[param1]
+                self.i += 2
+        return outputs
 
 
-def param(program, index, param_nb):
-    operation = "{:>05}".format(program[index])
-    if operation[-(2 + param_nb)] == "0":
-        if index + param_nb >= len(program):
-            return 0
-        return program[index + param_nb]
-    else:
-        return index + param_nb
+def puzzle1(program_l):
+    p = Program(program_l)
+    return p.run([1])[0]
 
 
-def puzzle1(program):
-    max_out = 0
-    for phases in itertools.permutations([0, 1, 2, 3, 4]):
-        programs = [Program(program[:], phases[i]) for i in range(5)]
-        input_v = 0
-        for p in programs:
-            input_v = p.run([p.phase, input_v])
-        max_out = max(max_out, input_v)
-    return max_out
-
-
-def puzzle2(program):
-    max_out = 0
-    for phases in itertools.permutations([5, 6, 7, 8, 9]):
-        programs = [Program(program[:], phases[i]) for i in range(5)]
-        input_v = 0
-        for p in programs:
-            input_v = p.run([p.phase, input_v])
-        curr_program = 0
-        while not programs[4].has_halted:
-            input_v = programs[curr_program % 5].run([input_v])
-            curr_program += 1
-        max_out = max(max_out, input_v)
-    return max_out
+def puzzle2(program_l):
+    p = Program(program_l)
+    return p.run([2])[0]
 
 
 if __name__ == "__main__":
-    with open("res/day7.txt") as input_f:
+    with open("res/day9.txt") as input_f:
         original_program = [int(x) for x in input_f.read().split(",")]
         print(puzzle1(original_program[:]))
         print(puzzle2(original_program[:]))
