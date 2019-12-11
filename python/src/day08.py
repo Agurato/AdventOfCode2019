@@ -83,9 +83,9 @@ def puzzle2(input_s, width, height):
 
 
 if __name__ == "__main__":
-    with open("res/day8.txt") as input_f:
+    with open("res/day08.txt") as input_f:
         width = 25
         height = 6
-        # print(puzzle1(input_f.read(), width, height))
+        print(puzzle1(input_f.read(), width, height))
         input_f.seek(0)
         print(puzzle2(input_f.read(), width, height))

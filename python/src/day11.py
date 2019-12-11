@@ -8,8 +8,7 @@ class Painter:
         self.y = 0
         self.dir = 0
         self.program = Program(program_l)
-        
-    
+
     def step(self, turn_dir):
         if turn_dir == 0:
             # Go left
@@ -25,7 +24,6 @@ class Painter:
             self.y -= 1
         else:
             self.x -= 1
-        
 
 
 class Program:
@@ -124,7 +122,7 @@ def puzzle1(program_l):
         outputs = painter.program.run([color])
         panels[(painter.x, painter.y)] = outputs[0]
         painter.step(outputs[1])
-        
+
     return len(panels)
 
 
@@ -136,4 +134,4 @@ if __name__ == "__main__":
     with open("res/day11.txt") as input_f:
         original_program = [int(x) for x in input_f.read().split(",")]
         print(puzzle1(original_program[:]))
-        #print(puzzle2(original_program[:]))
+        # print(puzzle2(original_program[:]))

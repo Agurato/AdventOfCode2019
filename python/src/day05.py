@@ -76,7 +76,7 @@ def puzzle2(program):
 
 
 if __name__ == "__main__":
-    with open("res/day5.txt", "r") as input_f:
+    with open("res/day05.txt", "r") as input_f:
         original_program = [int(x) for x in input_f.read().split(",")]
         puzzle1(original_program[:])
         puzzle2(original_program[:])

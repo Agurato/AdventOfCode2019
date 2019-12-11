@@ -63,7 +63,7 @@ def puzzle2(planets):
 
 
 if __name__ == "__main__":
-    with open("res/day6.txt", "r") as input_f:
+    with open("res/day06.txt", "r") as input_f:
         orbit_list = [x.replace("\n", "") for x in input_f.readlines()]
         planets = compute_orbits(orbit_list)
         print(puzzle1(planets))
