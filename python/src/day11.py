@@ -29,7 +29,7 @@ class Painter:
 class Program:
     def __init__(self, program):
         self.i = 0
-        self.program = program
+        self.program = program + [0] * 10000
         self.relative_base = 0
         self.has_halted = False
 
@@ -47,10 +47,6 @@ class Program:
                 return 0
             return self.program[self.i + param_nb] + self.relative_base
 
-    def extend_program(self, param1, param2, param3):
-        if max(param1, param2, param3) > len(self.program):
-            self.program += [0] * (max(param1, param2, param3) - len(self.program))
-
     def run(self, inputs):
         input_c = 0
         outputs = []
@@ -59,7 +55,6 @@ class Program:
             param1 = self.param(1)
             param2 = self.param(2)
             param3 = self.param(3)
-            self.extend_program(param1, param2, param3)
             if opcode == 1:
                 # Addition
                 self.program[param3] = self.program[param1] + self.program[param2]
@@ -76,9 +71,9 @@ class Program:
             elif opcode == 4:
                 # Output
                 outputs.append(self.program[param1])
+                self.i += 2
                 if len(outputs) == 2:
                     return outputs
-                self.i += 2
             elif opcode == 5:
                 # Jump if true
                 if self.program[param1] != 0:
@@ -120,18 +115,46 @@ def puzzle1(program_l):
         if (painter.x, painter.y) in panels:
             color = panels[(painter.x, painter.y)]
         outputs = painter.program.run([color])
-        panels[(painter.x, painter.y)] = outputs[0]
-        painter.step(outputs[1])
+        if len(outputs) == 2:
+            panels[(painter.x, painter.y)] = outputs[0]
+            painter.step(outputs[1])
 
     return len(panels)
 
 
 def puzzle2(program_l):
-    pass
+    min_x, max_x, min_y, max_y = 0, 0, 0, 0
+    painter = Painter(program_l)
+    panels = {(0, 0): 1}
+    while not painter.program.has_halted:
+        color = 0
+        if (painter.x, painter.y) in panels:
+            color = panels[(painter.x, painter.y)]
+        outputs = painter.program.run([color])
+        if len(outputs) == 2:
+            panels[(painter.x, painter.y)] = outputs[0]
+            painter.step(outputs[1])
+            min_x = min(min_x, painter.x)
+            max_x = max(max_x, painter.x)
+            min_y = min(min_y, painter.y)
+            max_y = max(max_y, painter.y)
+    lines = []
+    for y in range(min_y, max_y + 1):
+        disp = ""
+        for x in range(min_x, max_x + 1):
+            if (x, y) in panels and panels[(x, y)] == 1:
+                disp += "██"
+            else:
+                disp += "  "
+        lines.insert(0, disp)
+    disp = ""
+    for line in lines:
+        disp += line + "\n"
+    return disp
 
 
 if __name__ == "__main__":
     with open("res/day11.txt") as input_f:
         original_program = [int(x) for x in input_f.read().split(",")]
         print(puzzle1(original_program[:]))
-        # print(puzzle2(original_program[:]))
+        print(puzzle2(original_program[:]))

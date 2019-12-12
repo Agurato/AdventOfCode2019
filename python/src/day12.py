@@ -1,21 +1,20 @@
 # https://adventofcode.com/2019/day/12
 import itertools
-import json
 
 
 class Moon:
     def __init__(self, pos):
         self.pos = pos
         self.vel = XYZ(0, 0, 0)
-    
+
     def update_pos(self):
         self.pos.x += self.vel.x
         self.pos.y += self.vel.y
         self.pos.z += self.vel.z
-    
+
     def energy(self):
         return self.pos.energy() * self.vel.energy()
-    
+
     def __repr__(self):
         return f"pos={self.pos}, vel={self.vel}"
 
@@ -25,10 +24,10 @@ class XYZ:
         self.x = x
         self.y = y
         self.z = z
-    
+
     def energy(self):
         return abs(self.x) + abs(self.y) + abs(self.z)
-    
+
     def __repr__(self):
         return f"({self.x}, {self.y}, {self.z})"
 
@@ -55,18 +54,27 @@ def calc_gravity(moon1, moon2):
 
 
 def get_moons(lines):
-    return [Moon(XYZ(*[int(pair.split("=")[1].replace(">", "")) for pair in line.split(", ")])) for line in lines]
-    
-    
+    return [
+        Moon(
+            XYZ(
+                *[int(pair.split("=")[1].replace(">", "")) for pair in line.split(", ")]
+            )
+        )
+        for line in lines
+    ]
+
+
 def gcd(a, b):
     """Compute the greatest common divisor of a and b"""
     while b > 0:
         a, b = b, a % b
     return a
-    
+
+
 def lcm(a, b):
     """Compute the lowest common multiple of a and b"""
     return a * b // gcd(a, b)
+
 
 def puzzle1(input_f):
     moons = get_moons(input_f.readlines())
@@ -88,7 +96,7 @@ def puzzle2(input_f):
     z_repeat = 0
     count = 0
     run = True
-    while(run):
+    while run:
         for pair in itertools.combinations(moons, r=2):
             calc_gravity(*pair)
         for moon in moons:
@@ -122,4 +130,3 @@ if __name__ == "__main__":
         print(puzzle1(input_f))
         input_f.seek(0)
         print(puzzle2(input_f))
-            
