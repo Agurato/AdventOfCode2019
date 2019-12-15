@@ -1,5 +1,5 @@
 # https://adventofcode.com/2019/day/15
-import os
+import copy
 
 
 class Program:
@@ -83,7 +83,7 @@ def disp_map(tiles, robot_x, robot_y):
             if x == robot_x and y == robot_y:
                 disp += "D"
             elif x == 0 and y == 0:
-                disp += "0"
+                disp += "C"
             elif (x, y) in tiles:
                 disp += tiles[(x, y)]
             else:
@@ -92,14 +92,14 @@ def disp_map(tiles, robot_x, robot_y):
     return disp
 
 
-def puzzle1(intcodes):
-    p = Program(intcodes)
+def explore(program):
     tiles = {}
     directions = []
     x, y = 0, 0
     tiles[(x, y)] = "."
     objective = None
     went_reverse = False
+    objective_dist = 0
     while objective is None or len(directions) > 0:
         direction = 0
         next_tile = [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
@@ -120,7 +120,7 @@ def puzzle1(intcodes):
                 direction = 3
             directions = directions[:-1]
             went_reverse = True
-        out_v = p.run(direction)
+        out_v = program.run(direction)
         if out_v == 0:
             tiles[next_tile[direction - 1]] = "#"
         elif out_v == 1:
@@ -131,16 +131,54 @@ def puzzle1(intcodes):
                 directions.append(direction)
         elif out_v == 2:
             objective = (x, y)
-            tiles[next_tile[direction - 1]] = "X"
+            tiles[next_tile[direction - 1]] = "O"
             x = next_tile[direction - 1][0]
             y = next_tile[direction - 1][1]
             if not went_reverse:
                 directions.append(direction)
-            return len(directions)
+            objective_dist = len(directions)
+    return tiles, objective_dist
+
+
+def puzzle1(intcodes):
+    p = Program(intcodes)
+    return explore(p)[1]
 
 
 def puzzle2(intcodes):
-    pass
+    p = Program(intcodes)
+    tiles = explore(p)[0]
+    min_x, max_x, min_y, max_y = 0, 0, 0, 0
+    for key in tiles:
+        min_x = min(min_x, key[0])
+        max_x = max(max_x, key[0])
+        min_y = min(min_y, key[1])
+        max_y = max(max_y, key[1])
+    minutes = -1
+    empty_tiles = -1
+    while empty_tiles != 0:
+        empty_tiles = 0
+        new_tiles = {}
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                if (x, y) in tiles:
+                    if tiles[(x, y)] == ".":
+                        empty_tiles += 1
+                    if tiles[(x, y)] == "O" or (
+                        tiles[(x, y)] == "."
+                        and (
+                            tiles[(x - 1, y)] == "0"
+                            or tiles[(x + 1, y)] == "0"
+                            or tiles[(x, y - 1)] == "0"
+                            or tiles[(x, y + 1)] == "0"
+                        )
+                    ):
+                        new_tiles[(x, y)] = "0"
+                    else:
+                        new_tiles[(x, y)] = tiles[(x, y)]
+        minutes += 1
+        tiles = copy.deepcopy(new_tiles)
+    return minutes - 1
 
 
 if __name__ == "__main__":
