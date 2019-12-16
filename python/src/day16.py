@@ -3,21 +3,30 @@
 
 def puzzle1(numbers):
     pattern = [0, 1, 0, -1]
-    phase = 0
-    while phase < 100:
+    for phase in range(100):
         new_numbers = []
         for i in range(len(numbers)):
             sum = 0
-            for j in range(len(numbers)):
-                sum += numbers[j] * pattern[((j + 1) // (i + 1)) % 4]
+            for j in range(i, len(numbers)):
+                val = pattern[((j + 1) // (i + 1)) % 4]
+                if val == 1:
+                    sum += numbers[j]
+                elif val == -1:
+                    sum -= numbers[j]
             new_numbers.append(abs(sum) % 10)
-        phase += 1
-        numbers = new_numbers[:]
-    return "".join([str(x) for x in numbers[:8]])
+        numbers = new_numbers
+    return "".join(map(str, numbers[:8]))
 
 
 def puzzle2(numbers):
-    pass
+    offset = int("".join(map(str, numbers[:7])))
+    numbers = (numbers * 10000)[offset:]
+    for phase in range(100):
+        sum = 0
+        for i in range(len(numbers) - 1, -1, -1):
+            sum = (sum + numbers[i]) % 10
+            numbers[i] = sum
+    return "".join(map(str, numbers[:8]))
 
 
 if __name__ == "__main__":
