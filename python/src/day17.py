@@ -1,6 +1,13 @@
 # https://adventofcode.com/2019/day/17
 
 
+class Robot:
+    def __init__(self, x, y, dir):
+        self.x = x
+        self.y = y
+        self.dir = dir
+
+
 class Program:
     def __init__(self, program):
         self.i = 0
@@ -84,7 +91,101 @@ def get_map(intcodes):
             line = []
         else:
             line.append(chr(output))
+    print(disp)
     return lines[:-1]
+
+
+def is_intersection(lines, x, y):
+    total = 0
+    if lines[y][x] == "#":
+        if y > 0 and lines[y - 1][x] == "#":
+            total += 1
+        if y < len(lines) - 1 and lines[y + 1][x] == "#":
+            total += 1
+        if x > 0 and lines[y][x - 1] == "#":
+            total += 1
+        if x < len(lines[y]) - 1 and lines[y][x + 1] == "#":
+            total += 1
+    return total > 2
+
+
+def get_direction(lines, robot):
+    if robot.dir == "<" and robot.x > 0 and lines[robot.y][robot.x - 1] == "#":
+        if not is_intersection(lines, robot.x, robot.y):
+            lines[robot.y][robot.x] = "."
+        robot.x = robot.x - 1
+        return "F"
+    elif (
+        robot.dir == ">"
+        and robot.x < len(lines[robot.y]) - 1
+        and lines[robot.y][robot.x + 1] == "#"
+    ):
+        if not is_intersection(lines, robot.x, robot.y):
+            lines[robot.y][robot.x] = "."
+        robot.x = robot.x + 1
+        return "F"
+    elif robot.dir == "^" and robot.y > 0 and lines[robot.y - 1][robot.x] == "#":
+        if not is_intersection(lines, robot.x, robot.y):
+            lines[robot.y][robot.x] = "."
+        robot.y = robot.y - 1
+        return "F"
+    elif (
+        robot.dir == "v"
+        and robot.y < len(lines) - 1
+        and lines[robot.y + 1][robot.x] == "#"
+    ):
+        if not is_intersection(lines, robot.x, robot.y):
+            lines[robot.y][robot.x] = "."
+        robot.y = robot.y + 1
+        return "F"
+
+    new_dir = robot.dir
+    if robot.x > 0 and lines[robot.y][robot.x - 1] == "#":
+        new_dir = "<"
+        robot.x = robot.x - 1
+    elif robot.x < len(lines[robot.y]) - 1 and lines[robot.y][robot.x + 1] == "#":
+        new_dir = ">"
+        robot.x = robot.x + 1
+    elif robot.y > 0 and lines[robot.y - 1][robot.x] == "#":
+        new_dir = "^"
+        robot.y = robot.y - 1
+    elif robot.y < len(lines) - 1 and lines[robot.y + 1][robot.x] == "#":
+        new_dir = "v"
+        robot.y = robot.y + 1
+    else:
+        return None
+
+    result = ""
+
+    if robot.dir == "^":
+        if new_dir == ">":
+            result = "R"
+        elif new_dir == "<":
+            result = "L"
+    elif robot.dir == ">":
+        if new_dir == "v":
+            result = "R"
+        elif new_dir == "^":
+            result = "L"
+    elif robot.dir == "v":
+        if new_dir == ">":
+            result = "L"
+        elif new_dir == "<":
+            result = "R"
+    elif robot.dir == "<":
+        if new_dir == "v":
+            result = "L"
+        elif new_dir == "^":
+            result = "R"
+
+    robot.dir = new_dir
+    return result
+
+
+def separate_moves(total_moves):
+    for length in range(len(total_moves)//6):
+
+
 
 
 def puzzle1(intcodes):
@@ -93,18 +194,41 @@ def puzzle1(intcodes):
     for y in range(len(lines)):
         for x in range(len(lines[y])):
             if 0 < x < len(lines[y]) - 1 and 0 < y < len(lines) - 1:
-                if (
-                    lines[y][x] == "#"
-                    and lines[y - 1][x] == "#"
-                    and lines[y + 1][x] == "#"
-                    and lines[y][x - 1] == "#"
-                    and lines[y][x + 1] == "#"
-                ):
+                if is_intersection(lines, x, y):
                     sum += x * y
     return sum
 
 
 def puzzle2(intcodes):
+    lines = get_map(intcodes)
+    robot = Robot(0, 0, "^")
+    for y in range(len(lines)):
+        for x in range(len(lines[y])):
+            tile = lines[y][x]
+            if tile == "^" or tile == "v" or tile == "<" or tile == ">":
+                robot.x = x
+                robot.y = y
+                robot.dir = tile
+    total_moves = []
+    forward = 0
+    run = True
+    while run:
+        direction = get_direction(lines, robot)
+        if direction is None:
+            run = False
+        else:
+            if direction == "F":
+                forward += 1
+            else:
+
+                if forward > 0:
+                    total_moves.append(str(forward + 1))
+                total_moves.append(direction)
+                forward = 0
+    total_moves.append(str(forward + 1))
+    print(total_moves)
+    separate_moves(total_moves)
+
     intcodes[0] = 2
     main_movement = [ord(x) for x in "A,A,B,C,B,C,B,C,C,A\n"]
     A_movement = [ord(x) for x in "R,8,L,4,R,4,R,10,R,8\n"]
