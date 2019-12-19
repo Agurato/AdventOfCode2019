@@ -91,7 +91,6 @@ def get_map(intcodes):
             line = []
         else:
             line.append(chr(output))
-    print(disp)
     return lines[:-1]
 
 
@@ -182,10 +181,60 @@ def get_direction(lines, robot):
     return result
 
 
+def sublist_indexes(sublist, full_list):
+    if len(sublist) > len(full_list):
+        return []
+    indexes = []
+    for i in range(len(full_list) - len(sublist) + 1):
+        is_sublist = True
+        for j in range(len(sublist)):
+            if sublist[j] != full_list[i + j]:
+                is_sublist = False
+                break
+        if is_sublist:
+            indexes.append(i)
+    return indexes
+
+
 def separate_moves(total_moves):
-    for length in range(len(total_moves)//6):
+    a_move, a_pos, b_move, b_pos, c_move, c_pos = [], [], [], [], [], []
+    move_functions = []
+    abc = ["A", "B", "C"]
 
+    for abc_pos in range(3):
+        start = 0
+        for i in range(start, len(total_moves)):
+            if len(total_moves[i]) != 1:
+                break
+            start = i + 1
+        curr_move = []
+        curr_pos = []
+        for length in range(1, 6):
+            short_move = total_moves[start : start + length]
+            cancel = False
+            for move in short_move:
+                if len(move) == 1:
+                    cancel = True
+                    break
+            if cancel:
+                break
+            indexes = sublist_indexes(short_move, total_moves)
+            if len(indexes) == 1 or sum([len(x) for x in short_move]) > 11:
+                break
+            curr_pos = indexes[:]
+            curr_move = short_move[:]
+        for pos in reversed(curr_pos):
+            del total_moves[pos : pos + len(curr_move)]
+            total_moves.insert(pos, abc[abc_pos])
+        move_functions.append(curr_move)
 
+    input_data = [ord(x) for x in ",".join(total_moves) + "\n"]
+
+    for move_func in move_functions:
+        for i in range(len(move_func)):
+            move_func[i] = move_func[i][0] + "," + move_func[i][1:]
+        input_data += [ord(x) for x in ",".join(move_func) + "\n"]
+    return input_data + [ord(x) for x in "n\n"]
 
 
 def puzzle1(intcodes):
@@ -226,19 +275,16 @@ def puzzle2(intcodes):
                 total_moves.append(direction)
                 forward = 0
     total_moves.append(str(forward + 1))
-    print(total_moves)
-    separate_moves(total_moves)
+    total_moves = [
+        total_moves[i] + total_moves[i + 1] for i in range(0, len(total_moves), 2)
+    ]
+    input_data = separate_moves(total_moves)
 
     intcodes[0] = 2
-    main_movement = [ord(x) for x in "A,A,B,C,B,C,B,C,C,A\n"]
-    A_movement = [ord(x) for x in "R,8,L,4,R,4,R,10,R,8\n"]
-    B_movement = [ord(x) for x in "L,12,L,12,R,8,R,8\n"]
-    C_movement = [ord(x) for x in "R,10,R,4,R,4\n"]
-    video = [ord(x) for x in "n\n"]
     p = Program(intcodes)
     disp = ""
     out_v = 0
-    for output in p.run(main_movement + A_movement + B_movement + C_movement + video):
+    for output in p.run(input_data):
         character = chr(output)
         out_v = output
         if character == "\n":
