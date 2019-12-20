@@ -197,7 +197,6 @@ def sublist_indexes(sublist, full_list):
 
 
 def separate_moves(total_moves):
-    a_move, a_pos, b_move, b_pos, c_move, c_pos = [], [], [], [], [], []
     move_functions = []
     abc = ["A", "B", "C"]
 
