@@ -78,29 +78,58 @@ class Program:
         self.program = self.original_program[:]
 
 
+def get_bounds(intcodes):
+    p = Program(intcodes[:])
+    min_x, max_x, x = 0, 0, 0
+    found_beam = False
+    while max_x == 0:
+        if p.run([x, 10000]) == 0:
+            if found_beam:
+                max_x = x - 1
+        else:
+            if not found_beam:
+                min_x = x
+            found_beam = True
+        x += 1
+        p.reset()
+    return 10000 / (max_x + 1), 10000 / (min_x - 1)
+
+
 def puzzle1(intcodes):
     beam = set()
     p = Program(intcodes[:])
-    disp = ""
     for y in range(50):
         beam_at_y = False
         for x in range(50):
             if p.run([x, y]) == 1:
                 beam_at_y = True
                 beam.add((x, y))
-                disp += "#"
-            else:
-                disp += "."
-                if beam_at_y:
-                    break
+            elif beam_at_y:
+                break
             p.reset()
-        disp += "\n"
-    print(disp)
     return len(beam)
 
 
 def puzzle2(intcodes):
-    pass
+    p = Program(intcodes[:])
+    lower_bound, higher_bound = get_bounds(intcodes)
+    x_min = 100 * (lower_bound + 1) / (higher_bound - lower_bound)
+    y_min = lower_bound * (x_min + 100)
+    x_min = int(x_min)
+    y_min = int(y_min)
+    for x in range(x_min - 10, x_min + 2):
+        for y in range(y_min - 15, y_min + 2):
+            count_x, count_y = 0, 0
+            for dy in range(100):
+                count_y += p.run([x, y + dy])
+                p.reset()
+            if count_y != 100:
+                break
+            for dx in range(100):
+                count_x += p.run([x + dx, y])
+                p.reset()
+            if count_x == 100 and count_y == 100:
+                return x * 10000 + y
 
 
 if __name__ == "__main__":
